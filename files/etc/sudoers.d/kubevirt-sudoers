@@ -1,0 +1,1 @@
+apb ALL = (root) NOPASSWD: /etc/modprobe.d/kvm-intel.conf *

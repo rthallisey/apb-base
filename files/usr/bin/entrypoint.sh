@@ -23,7 +23,10 @@ fi
 
 ACTION=$1
 shift
-playbooks=/opt/apb/actions
+
+apb_action_path="${APB_ACTION_PATH:-}"
+playbooks="/etc/ansible/roles/${apb_action_path}"
+
 CREDS="/var/tmp/bind-creds"
 TEST_RESULT="/var/tmp/test-result"
 
@@ -52,7 +55,16 @@ if [[ ! -z "$mounted_secrets" ]] ; then
 fi
 set -x
 
-if [[ -e "$playbooks/$ACTION.yaml" ]]; then
+# if [[ -e "/opt/ansible/requirements.yml" ]]; then
+#   ansible-galaxy install -r /opt/ansible/requirements.yml
+# elif [[ -e "/opt/ansible/requirments.yaml" ]]; then
+#   ansible-galaxy install -r /opt/ansible/requirments.yaml
+# fi
+
+# $playbook is the path of the plabook to run. Pass in action=$ACTION as env var.
+if [[ -e "$playbooks" && ! -d "$playbooks" ]]; then
+  ANSIBLE_ROLES_PATH=/etc/ansible/roles:/opt/ansible/roles ansible-playbook $playbooks -e action=$ACTION "${@}" ${extra_args}
+elif [[ -e "$playbooks/$ACTION.yaml" ]]; then
   ANSIBLE_ROLES_PATH=/etc/ansible/roles:/opt/ansible/roles ansible-playbook $playbooks/$ACTION.yaml "${@}" ${extra_args}
 elif [[ -e "$playbooks/$ACTION.yml" ]]; then
   ANSIBLE_ROLES_PATH=/etc/ansible/roles:/opt/ansible/roles ansible-playbook $playbooks/$ACTION.yml  "${@}" ${extra_args}
